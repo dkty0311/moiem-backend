@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
            script:
-               cd /usr/share/moiem-backendd && git pull origin main
-               cd /usr/share/moiem-backendd && npm install
+               cd /usr/share/moiem-backend && git pull origin main
+               cd /usr/share/moiem-backend && npm install
                # npm run build (필요 시)
                pm2 restart moiem-backend  # PM2 앱 이름이 맞는지 확인하세요
