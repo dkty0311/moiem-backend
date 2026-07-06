@@ -27,10 +27,13 @@ jobs:
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
               nvm use 24.18.0
               
+              # 1. 의존성 설치
               npm install
+              
+              # 2. ★★★ 빌드 단계 추가 (이게 핵심입니다) ★★★
               npm run build
               
-              # 프로세스가 있으면 restart, 없으면 start
+              # 3. 프로세스 재시작
               pm2 describe moiem-backend > /dev/null
               if [ $? -eq 0 ]; then
                 pm2 restart moiem-backend
