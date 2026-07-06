@@ -17,9 +17,16 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # 중복된 script: 태그를 제거하고, 확인된 절대 경로를 적용했습니다.
+          # NVM을 초기화하고 실행하도록 수정
           script: |
             cd /usr/share/moiem-backend
             git pull origin main
-            /root/.nvm/versions/node/v24.18.0/bin/npm install
-            /root/.nvm/versions/node/v24.18.0/bin/pm2 restart moiem-backend
+            
+            # NVM 환경 로드
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # Node.js 버전 적용 및 실행
+            nvm use 24.18.0
+            npm install
+            pm2 restart moiem-backend
