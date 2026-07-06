@@ -28,6 +28,7 @@ jobs:
               nvm use 24.18.0
               
               npm install
+              npm run build
               
               # 프로세스가 있으면 restart, 없으면 start
               pm2 describe moiem-backend > /dev/null
