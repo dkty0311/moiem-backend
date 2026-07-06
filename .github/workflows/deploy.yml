@@ -2,7 +2,7 @@ name: Deploy Application
 
 on:
   push:
-    branches: [ main ]  # main 브랜치에 푸시될 때만 작동
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -17,9 +17,9 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # 중복된 script: 태그를 제거하고, 확인된 절대 경로를 적용했습니다.
           script: |
-           script:
-               cd /usr/share/moiem-backend && git pull origin main
-               cd /usr/share/moiem-backend && npm install
-               # npm run build (필요 시)
-               pm2 restart moiem-backend  # PM2 앱 이름이 맞는지 확인하세요
+            cd /usr/share/moiem-backend
+            git pull origin main
+            /root/.nvm/versions/node/v24.18.0/bin/npm install
+            /root/.nvm/versions/node/v24.18.0/bin/pm2 restart moiem-backend
