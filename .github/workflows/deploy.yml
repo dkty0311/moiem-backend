@@ -19,14 +19,20 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           # NVM을 초기화하고 실행하도록 수정
           script: |
-            cd /usr/share/moiem-backend
-            git pull origin main
-            
-            # NVM 환경 로드
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            
-            # Node.js 버전 적용 및 실행
-            nvm use 24.18.0
-            npm install
-            pm2 restart moiem-backend
+              cd /usr/share/moiem-backend
+              git pull origin main
+              
+              # NVM 환경 로드
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              nvm use 24.18.0
+              
+              npm install
+              
+              # 프로세스가 있으면 restart, 없으면 start
+              pm2 describe moiem-backend > /dev/null
+              if [ $? -eq 0 ]; then
+                pm2 restart moiem-backend
+              else
+                pm2 start dist/main.js --name moiem-backend
+              fi
