@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,6 +21,15 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
+
+  // 위치 기반 필드
+  latitude      Float?
+  longitude     Float?
+  dong          String?
+
+  // 관계 설정
+  hostedMoiems  Moiem[]        @relation("HostedMoiems")
+  joinedMoiems  MoiemParticipant[]
 }
 
 model RefreshToken {
@@ -31,3 +40,40 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model Moiem {
+  id           String             @id @default(uuid())
+  title        String
+  description  String
+  meetAt       DateTime
+  
+  // 약속 장소 위치 정보
+  latitude     Float
+  longitude    Float
+  placeName    String
+  address      String
+  dong         String
+  
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  // 주최자 관계
+  hostId       String
+  host         User               @relation("HostedMoiems", fields: [hostId], references: [id], onDelete: Cascade)
+
+  // 참여자 관계
+  participants MoiemParticipant[]
+}
+
+model MoiemParticipant {
+  id        String   @id @default(uuid())
+  moiemId   String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  moiem     Moiem    @relation(fields: [moiemId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([moiemId, userId])
+}
+
