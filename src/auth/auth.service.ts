@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { MailService } from '../mail/mail.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -20,7 +22,62 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
   ) {}
+
+  async sendVerificationCode(email: string) {
+    const existing = await this.usersService.findByEmail(email);
+    if (existing) {
+      throw new ConflictException('이미 가입된 이메일입니다.');
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3분 유효
+
+    await this.prisma.emailVerification.upsert({
+      where: { email },
+      update: {
+        code,
+        expiresAt,
+        isVerified: false,
+      },
+      create: {
+        email,
+        code,
+        expiresAt,
+        isVerified: false,
+      },
+    });
+
+    await this.mailService.sendVerificationCode(email, code);
+
+    return { message: '인증번호가 이메일로 발송되었습니다.' };
+  }
+
+  async verifyCode(email: string, code: string) {
+    const verification = await this.prisma.emailVerification.findUnique({
+      where: { email },
+    });
+
+    if (!verification) {
+      throw new NotFoundException('인증 요청 내역이 없습니다. 먼저 인증번호를 발송해 주세요.');
+    }
+
+    if (verification.code !== code) {
+      throw new BadRequestException('인증번호가 일치하지 않습니다.');
+    }
+
+    if (new Date() > verification.expiresAt) {
+      throw new BadRequestException('인증번호가 만료되었습니다. 다시 발송해 주세요.');
+    }
+
+    await this.prisma.emailVerification.update({
+      where: { email },
+      data: { isVerified: true },
+    });
+
+    return { message: '이메일 인증이 완료되었습니다.' };
+  }
 
   async register(dto: RegisterDto) {
     const existing = await this.usersService.findByEmail(dto.email);
@@ -28,11 +85,23 @@ export class AuthService {
       throw new ConflictException('이미 사용 중인 이메일입니다.');
     }
 
+    const verification = await this.prisma.emailVerification.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!verification || !verification.isVerified) {
+      throw new BadRequestException('이메일 인증이 완료되지 않았습니다.');
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.create({
       email: dto.email,
       password: hashedPassword,
       name: dto.name,
+    });
+
+    await this.prisma.emailVerification.delete({
+      where: { email: dto.email },
     });
 
     return this.toPublicUser(user);
