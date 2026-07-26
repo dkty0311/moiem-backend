@@ -77,14 +77,3 @@ model MoiemParticipant {
   @@unique([moiemId, userId])
 }
 
-model EmailVerification {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  code       String
-  isVerified Boolean  @default(false)
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-

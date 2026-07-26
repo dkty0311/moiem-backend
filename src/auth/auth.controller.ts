@@ -9,29 +9,11 @@ import { CheckEmailDto } from './dto/check-email.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
-import { SendVerificationDto } from './dto/send-verification.dto';
-import { VerifyCodeDto } from './dto/verify-code.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Public()
-  @Post('email/send')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: '이메일 인증번호 발송' })
-  sendVerificationCode(@Body() dto: SendVerificationDto) {
-    return this.authService.sendVerificationCode(dto.email);
-  }
-
-  @Public()
-  @Post('email/verify')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: '이메일 인증번호 검증' })
-  verifyCode(@Body() dto: VerifyCodeDto) {
-    return this.authService.verifyCode(dto.email, dto.code);
-  }
 
   @Public()
   @Post('register')
