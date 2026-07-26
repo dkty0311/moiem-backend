@@ -38,6 +38,11 @@ export class AuthService {
     return this.toPublicUser(user);
   }
 
+  async checkEmail(email: string) {
+    const existing = await this.usersService.findByEmail(email);
+    return { isAvailable: !existing };
+  }
+
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) {
