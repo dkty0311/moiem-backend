@@ -16,16 +16,20 @@ model User {
   id            String         @id @default(uuid())
   email         String         @unique
   password      String
-  name          String?
-  role          Role           @default(USER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  refreshTokens RefreshToken[]
+  name               String?
+  nickname           String?
+  bio                String?
+  profileImageUrl    String?
+  favoriteCategories Json?
+  role               Role           @default(USER)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  refreshTokens      RefreshToken[]
 
-  // 위치 기반 필드
-  latitude      Float?
-  longitude     Float?
-  dong          String?
+  // 위치 기반 필드 (활동지역)
+  latitude           Float?
+  longitude          Float?
+  dong               String?
 
   // 관계 설정
   hostedMoiems  Moiem[]        @relation("HostedMoiems")

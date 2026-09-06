@@ -97,7 +97,14 @@ export class AuthService {
     const user = await this.usersService.create({
       email: dto.email,
       password: hashedPassword,
-      name: dto.name,
+      name: dto.name ?? dto.nickname,
+      nickname: dto.nickname,
+      bio: dto.bio,
+      profileImageUrl: dto.profileImageUrl,
+      favoriteCategories: dto.favoriteCategories,
+      dong: dto.dong,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
     });
 
     await this.prisma.emailVerification.delete({
@@ -223,6 +230,13 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      nickname: user.nickname,
+      bio: user.bio,
+      profileImageUrl: user.profileImageUrl,
+      favoriteCategories: user.favoriteCategories,
+      dong: user.dong,
+      latitude: user.latitude,
+      longitude: user.longitude,
       role: user.role,
       createdAt: user.createdAt,
     };
