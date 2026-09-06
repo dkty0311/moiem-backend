@@ -9,11 +9,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import type { Request } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
+import { UploadResponseDto } from './dto/upload-response.dto';
 import { UploadService } from './upload.service';
 
 const uploadStorage = diskStorage({
@@ -51,6 +52,10 @@ export class UploadController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '단일 이미지 업로드 (프로필 사진 등)' })
   @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({
+    type: UploadResponseDto,
+    description: '이미지 업로드 성공 시 반환되는 파일 정보 및 URL',
+  })
   @ApiBody({
     schema: {
       type: 'object',
